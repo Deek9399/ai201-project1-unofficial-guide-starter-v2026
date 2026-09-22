@@ -21,13 +21,55 @@ Swap them for your own if you like. Keep five of them either way: criterion 3
 names a target of "4 of 5", and four of three is not a thing.
 """
 
+"""
+questions.py
+Five in-scope evaluation questions and five out-of-scope gate check questions.
+"""
+
 QUESTIONS = [
-    # {"question": "...", "expects": "..."},
-    {"question": "", "expects": ""},
-    {"question": "", "expects": ""},
-    {"question": "", "expects": ""},
-    {"question": "", "expects": ""},
-    {"question": "", "expects": ""},
+    {
+        "question": "What is the policy on quiet hours during finals week in residential dorms?",
+        "expects": "quiet hours",
+    },
+    {
+        "question": "Which dining hall has the worst lunch rush wait times according to students?",
+        "expects": "Commons",
+    },
+    {
+        "question": "Are first-year undergraduate students allowed to bring cars on campus?",
+        "expects": "parking",
+    },
+    {
+        "question": "How is the priority determined for the rising sophomore room lottery?",
+        "expects": "lottery",
+    },
+    {
+        "question": "What campus library offers 24/7 study access during exams?",
+        "expects": "library",
+    },
+]
+
+OUT_OF_SCOPE = [
+    {
+        "question": "What is the average annual rainfall in the Amazon rainforest?",
+        "expects": "I don't have enough information about that",
+    },
+    {
+        "question": "How do you calculate eigenvalues for a 3x3 matrix in linear algebra?",
+        "expects": "I don't have enough information about that",
+    },
+    {
+        "question": "What are the common symptoms of a failing alternator in a car?",
+        "expects": "I don't have enough information about that",
+    },
+    {
+        "question": "Who won the FIFA Men's World Cup in 1998?",
+        "expects": "I don't have enough information about that",
+    },
+    {
+        "question": "How does Docker containerization isolate memory from the host OS?",
+        "expects": "I don't have enough information about that",
+    },
 ]
 
 # Questions from a different world entirely. Your gate should refuse all five.

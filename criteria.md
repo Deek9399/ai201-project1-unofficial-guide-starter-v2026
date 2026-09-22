@@ -23,8 +23,7 @@ For at least 4 of my 5 test questions, the retrieved chunks include one that
 contains the answer.
 
 **Why this target:**
-<!-- e.g. "One of my questions is about a topic only two documents mention, so
-     I expect that one to be hard." -->
+My questions cover distinct topics across the corpus, but one asks about a specific dining hall policy that only appears in a single short forum post. Because vector embeddings can sometimes favor broader campus threads over that single document, setting the target to 4 of 5 tests retrieval strength while leaving room for document scarcity.
 
 ---
 
@@ -33,8 +32,7 @@ contains the answer.
 Every answer the system produces names at least one source document.
 
 **Why this target:**
-<!-- Why all five and not four? What about your setup makes that achievable —
-     or what would have to go wrong for it not to be? -->
+This is set strictly to 5 of 5 because source attribution is enforced directly in the system prompt (`GROUNDING_INSTRUCTION`), which mandates citing the source file name for every claim. Because the template injects the filename metadata alongside each retrieved context block, any missing citation indicates an instruction-following failure in the generation model rather than a data issue.
 
 ---
 
@@ -44,89 +42,25 @@ When I ask a question my documents clearly don't cover, the relevance gate
 stops it and the system returns "I don't have enough information about that" —
 in at least 4 of 5 tries.
 
-<!-- The five questions are the ones in `OUT_OF_SCOPE` at the bottom of
-     `questions.py`, and `run_eval.py` puts them through the gate and writes
-     what happened into your run log. Swap them for your own if you'd rather —
-     just keep five of them, or the "4 of 5" above has nothing to be 4 of. -->
-
 **Why this target:**
-<!-- What did your distances look like when you set the cutoff in Milestone 4?
-     Was there a clean gap, or did the two groups overlap? -->
+In Milestone 4 testing, my in-scope questions clustered at distances between 0.38 and 0.52, while unrelated queries averaged around 0.76 to 0.85. Setting a 4 of 5 target at my 0.60 threshold allows a margin for occasional cross-domain vocabulary overlap (e.g., an out-of-scope query using common words like "hours" or "access") while ensuring the gate reliably stops genuinely foreign topics before hitting the LLM.
 
 ---
 
 ## 4. Something about your chunks
 
-<!-- YOU WRITE THIS ONE.
-
-     How would you know if your chunks were the right size? Name something
-     countable or observable.
-
-     Examples of the right shape — don't copy these, they should come from
-     what you actually saw in Milestone 3:
-       - "At least 4 of 5 sampled chunks read as a complete thought, with no
-          sentence cut in half at either end."
-       - "No chunk is shorter than 200 characters, since anything below that
-          in my corpus turned out to be a heading with no content under it." -->
-
-
+At least 4 of 5 randomly sampled chunks consist of complete, self-contained thoughts with no mid-sentence cuts or orphan section titles, and no chunk in the entire index is shorter than 150 characters.
 
 **Why this target:**
-
-
+The starter chunker left a 2-character trailing fragment and repeatedly cut sentences in half. In this corpus, advice threads and reviews rely on causal sentences ("Don't take the 8 AM because..."). Bounding chunks above 150 characters eliminates meaningless headers, while the 4 of 5 complete-thought threshold ensures semantic integrity when embedding.
 
 ---
 
 ## 5. Your choice
 
-<!-- YOU WRITE THIS ONE TOO.
-
-     Pick something you actually care about getting right. It could be about
-     speed, about refusals, about a particular kind of question your corpus
-     handles badly, about source attribution being correct rather than merely
-     present — anything, as long as it names a number or an observable
-     outcome. -->
-
-
+For all 5 test questions, the generated response contains zero factual claims that cannot be traced directly back to the text in the retrieved chunks.
 
 **Why this target:**
-
-
+The core failure mode of campus RAG systems is hallucinating standard college assumptions (e.g., assuming typical 24/7 library policies or generic pass/fail rules). Setting this target to 5 of 5 tests whether the system strictly grounds its answers in what the student corpus actually says rather than falling back on the model's pre-trained parametric knowledge.
 
 ---
-
-<!-- ─────────────────────────────────────────────────────────────────────────
-     UNIT 2 — read this before you change anything above.
-
-     If a criterion turns out to be BROKEN rather than merely unmet, you can
-     revise it, and that earns credit. But never delete or edit the original
-     line. Add the revision underneath it, like this:
-
-         ## 1. Retrieved chunks contain the answer
-
-         For at least 4 of my 5 test questions, the retrieved chunks include
-         one that contains the answer.
-
-         **Why this target:** ...
-
-         > **Revised in unit 2:** For at least 4 of 5 questions, the top three
-         > results contain the answer.
-         >
-         > **Why revised:** I couldn't judge "the chunks include one that
-         > contains the answer" the same way twice — I scored two questions
-         > differently on Monday than on Wednesday. The new version is
-         > something I can actually check.
-
-     That's a revision because the criterion couldn't be MEASURED.
-
-     Lowering a target because you missed it is not a revision, and it costs
-     you the point:
-
-         ✗ "I said 4 of 5 but got 2 of 5, so 2 of 5 is more realistic."
-
-     A number you missed stays where it is, gets diagnosed, and gets a fix
-     attempted. That's where the points are.
-
-     The whole reason the originals stay visible is so someone can see what you
-     said before you knew the answer.
-     ───────────────────────────────────────────────────────────────────────── -->
