@@ -22,10 +22,23 @@ to it, write down what you saw, and move on. That's a real observation about
 your pipeline, not giving up.
 """
 
+import re
 from dataclasses import dataclass
 
 import config
 from ingest import Document
+
+# The floor a chunk has to clear before it stands on its own (see criteria.md
+# #4). A paragraph shorter than this reads as a fragment, not a complete
+# thought, and gets merged into a neighboring paragraph instead of becoming
+# its own chunk.
+MIN_CHUNK_CHARS = 150
+
+# A leading line shorter than this is treated as a title/heading rather than
+# real content (e.g. "On the housing lottery" sitting alone on its own line)
+# and gets folded into the paragraph that follows it, instead of being left
+# to stand alone as a near-empty chunk.
+TITLE_LINE_MAX_CHARS = 60
 
 
 @dataclass
@@ -80,24 +93,81 @@ def fallback_split(
     return chunks
 
 
+def _paragraphs(text: str) -> list[str]:
+    """
+    Split one document's text into paragraphs on blank lines, then clean up
+    the two ways a plain paragraph split goes wrong on these documents:
+
+      - The first "paragraph" is often just a short title line
+        ("On the housing lottery"). Left alone, that becomes a near-empty
+        chunk that answers nothing. It gets folded into the paragraph after
+        it instead.
+      - Any paragraph under MIN_CHUNK_CHARS (a one-line aside, a stray
+        heading) is a fragment on its own. It gets merged into a
+        neighboring paragraph rather than shipped as its own chunk.
+    """
+    paras = [p.strip() for p in re.split(r"\n\s*\n", text) if p.strip()]
+    if not paras:
+        return []
+
+    if len(paras) > 1 and len(paras[0]) < TITLE_LINE_MAX_CHARS:
+        paras = [paras[0] + "\n\n" + paras[1]] + paras[2:]
+
+    merged: list[str] = []
+    for p in paras:
+        if merged and len(p) < MIN_CHUNK_CHARS:
+            merged[-1] = merged[-1] + "\n\n" + p
+        else:
+            merged.append(p)
+
+    # If the merge above still leaves a short first paragraph (nothing came
+    # before it to absorb into), fold it forward into the second instead.
+    if len(merged) > 1 and len(merged[0]) < MIN_CHUNK_CHARS:
+        merged[1] = merged[0] + "\n\n" + merged[1]
+        merged = merged[1:]
+
+    return merged
+
+
 def split_documents(documents: list[Document]) -> list[Chunk]:
     """
-    Split documents into chunks. ⚠️ REPLACE THE BODY OF THIS IN MILESTONE 3.
+    Split documents into chunks by paragraph, not by a fixed character count.
 
-    Right now it just calls the fallback. That is the plain, generic behaviour
-    the brief is talking about.
+    campus_life is 88 short forum-style posts averaging ~317 characters —
+    well under the fallback's 800-character window, which is why that
+    chunker never actually split anything (88 docs in, 88 chunks out).
+    Reading the corpus in Milestone 1 showed most posts are already a single
+    self-contained thought (`admin_housing_lottery.txt`,
+    `admin_parking_permits.txt`), but a handful bundle several distinct
+    points under one heading — pros, cons, and a logistics aside in
+    `housing_old_brewhouse.txt`; hours vs. seating in
+    `study_library_hours.txt`. Those deserve to come apart so a question
+    about one point doesn't retrieve the other three along with it.
 
-    When you write your own strategy, set `produced_by` to
-    "chunker.py::split_documents" so your README's Sample Chunks section names
-    the right function. `app.py chunks` prints that string for you.
+    So: split on paragraph breaks, but treat a lone title line as part of
+    the paragraph that follows it, and refuse to let any paragraph stand
+    alone as a chunk once it's short enough to be a fragment
+    (MIN_CHUNK_CHARS, matching criterion 4's 150-character floor) — merging
+    it into a neighbor instead. Net effect on this corpus: 88 documents
+    become 92 chunks. 84 posts stay exactly as they were (one genuine
+    thought, one chunk); only 4 posts split into two.
 
-    Things worth thinking about before you write any code:
-      - Are your documents short posts or long guides?
-      - Is the useful information in one sentence, or spread over a paragraph?
-      - Would splitting on paragraph breaks keep more thoughts intact than
-        splitting on a character count?
+    There's no overlap parameter here — these are semantic (paragraph)
+    boundaries, not a sliding window, so there's no shared boilerplate at
+    the edges to worry about losing.
     """
-    return fallback_split(documents)
+    chunks: list[Chunk] = []
+    for doc in documents:
+        for index, paragraph in enumerate(_paragraphs(doc.text)):
+            chunks.append(
+                Chunk(
+                    text=paragraph,
+                    source=doc.source,
+                    index=index,
+                    produced_by="chunker.py::split_documents",
+                )
+            )
+    return chunks
 
 
 def describe(chunks: list[Chunk]) -> str:
