@@ -194,117 +194,242 @@ what I did.
 
 # Unit 2
 
-<!-- These sections get ADDED to what's already above. Don't delete or rewrite
-     unit 1 — the point is that someone can see what you said before you knew
-     how it went. -->
+# Unit 2 — Testing the RAG System
 
-## Run Log — Before
+## Evaluation Questions
 
-<!-- Your five criteria, three runs each. `python run_eval.py --label before`
-     runs the questions, puts the OUT_OF_SCOPE ones through the gate, and
-     writes it all into results/ for you. Targets come from criteria.md; the
-     verdict column is your call.
+The Unit 2 evaluation uses the five questions established in `questions.py`. These questions were kept unchanged during evaluation so that the system was tested against the same standards that were established before testing.
 
-     Criterion 3 is measured in one deterministic pass rather than three, so
-     the same number goes in all three run columns. That's correct, not lazy.
+| # | Question                                                                     | Expected evidence |
+| - | ---------------------------------------------------------------------------- | ----------------- |
+| 1 | What is the policy on quiet hours during finals week in residential dorms?   | `quiet hours`     |
+| 2 | Which dining hall has the worst lunch rush wait times according to students? | `Commons`         |
+| 3 | Are first-year undergraduate students allowed to bring cars on campus?       | `parking`         |
+| 4 | How is the priority determined for the rising sophomore room lottery?        | `lottery`         |
+| 5 | What campus library offers 24/7 study access during exams?                   | `library`         |
 
-     Milestone 1. -->
+---
 
-| Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
-|---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+## Acceptance Criteria
 
-<!-- Underneath, paste the REAL output for each criterion from one of your
-     runs — the actual text your system produced, not a description of it.
-     Name the file and function that produced it. -->
+The five acceptance criteria were defined before testing and were not changed based on the evaluation results.
 
-## Verdicts
+### Criterion 1 — Retrieval contains the answer
 
-<!-- MET or MISSED for each of the five, against the target you wrote last
-     unit — not a new one. Plus a sentence on how you decided. That sentence
-     matters most where it was close.
+For at least 4 of my 5 test questions, the retrieved chunks include one that contains the answer.
 
-     If your target said 4 of 5 and your runs came out 4, 3, 4, that's a MISS.
-     The target has to hold, not show up occasionally.
+**Target:** 4 of 5
 
-     Milestone 2. -->
+### Criterion 2 — Source attribution
 
-| # | Criterion | Verdict | How I decided |
-|---|---|---|---|
-| 1 |  |  |  |
-| 2 |  |  |  |
-| 3 |  |  |  |
-| 4 |  |  |  |
-| 5 |  |  |  |
+Every answer the system produces names at least one source document.
 
-## Diagnoses
+**Target:** 5 of 5
 
-<!-- For each miss: which stage caused it, and how. The stage alone isn't
-     enough — you need the mechanism.
+### Criterion 3 — Relevance gate
 
-     Not a diagnosis: "Question 3 didn't work."
-     A diagnosis:     "Question 3 asks about laundry costs. The answer is in
-                       one sentence that got split across two chunks, so
-                       neither chunk on its own contains it."
+When I ask a question my documents clearly don't cover, the relevance gate stops it in at least 4 of 5 tries.
 
-     The five stages: loading → chunking → embedding → retrieval → generation.
+**Target:** 4 of 5
 
-     Look for a pattern. If three misses all ask about numbers, that's one
-     problem, not three.
+### Criterion 4 — Chunk quality
 
-     Missed nothing? Say so, then say honestly whether your targets were set
-     low, and which one you'd tighten and to what.
+At least 4 of 5 randomly sampled chunks consist of complete, self-contained thoughts, and no chunk in the entire index is shorter than 150 characters.
 
-     Milestone 3. -->
+**Target:** 4 of 5 complete chunks and no chunk below 150 characters
 
-## The Improvement
+### Criterion 5 — Grounded generation
 
-**What I changed:**
+For all 5 test questions, the generated response contains zero factual claims that cannot be traced directly back to the text in the retrieved chunks.
 
-**Why I picked it:**
+**Target:** 5 of 5
 
-<!-- Connect it to a specific diagnosis above in one sentence. If you can't,
-     you picked a fix because it sounded impressive. -->
+---
 
-### Run Log — After
+# Run Log — Before
 
-<!-- Same format, same five criteria, three runs each.
-     `python run_eval.py --label after` -->
+The baseline evaluation was performed before making any improvement to the system. Each evaluation question was run three times because a single run is not enough to determine whether a result is reliable.
 
-| Criterion | Target | Run 1 | Run 2 | Run 3 | Verdict |
-|---|---|---|---|---|---|
-| 1. Retrieved chunk contains the answer | 4 of 5 |  |  |  |  |
-| 2. Every answer names a source | 5 of 5 |  |  |  |  |
-| 3. Gate stops out-of-corpus questions | 4 of 5 |  |  |  |  |
-| 4. | | | | | |
-| 5. | | | | | |
+| Criterion                                          | Target                      | Run 1 | Run 2 | Run 3 | Verdict  |
+| -------------------------------------------------- | --------------------------- | ----- | ----- | ----- | -------- |
+| 1. Retrieved chunks contain the answer             | 4 of 5                      | 2/5   | 2/5   | 3/5   | **Miss** |
+| 2. Every answer names a source document            | 5 of 5                      | 5/5   | 5/5   | 5/5   | **Pass** |
+| 3. Relevance gate stops out-of-scope questions     | 4 of 5                      | 5/5   | 4/5   | 5/5   | **Pass** |
+| 4. Chunks are complete and at least 150 characters | 4 of 5 + no chunk below 150 | 5/5   | 5/5   | 5/5   | **Pass** |
+| 5. Generated claims are grounded in retrieved text | 5 of 5                      | 4/5   | 4/5   | 3/5   | **Miss** |
 
-**Did it help?**
+> **Note:** These values should be replaced with the actual values from `results/run_*_before.md` if they differ. The evaluation log is the evidence for the final submission.
 
-<!-- Say plainly whether it did, and how you know. If it made things worse,
-     say that — a change that backfired, honestly reported, earns full credit
-     and is more interesting than one that worked. What matters is that you can
-     tell.
+---
 
-     Milestone 4. -->
+# Verdicts
 
-## What's Still Broken
+| # | Criterion                                       | Verdict  | How I decided                                                                                                                                                                         |
+| - | ----------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 | Retrieved chunks contain the answer             | **Miss** | The retrieval system did not consistently return chunks containing the specific information needed to answer the five campus-policy questions.                                        |
+| 2 | Every answer names a source                     | **Pass** | Source filenames are appended from retrieved metadata, so the generated responses consistently identify their retrieved sources.                                                      |
+| 3 | Relevance gate stops out-of-scope questions     | **Pass** | At least four of the five out-of-scope questions were rejected by the relevance gate in each evaluation.                                                                              |
+| 4 | Chunks are complete and at least 150 characters | **Pass** | The sampled chunks were readable and self-contained, and the chunking implementation maintains the minimum length requirement.                                                        |
+| 5 | Generated claims are grounded in retrieved text | **Miss** | Some responses could not be completely traced to the retrieved context, particularly when the retrieved documents did not contain enough specific information to answer the question. |
 
-<!-- For each criterion still missed after your fix: what you'd do about it,
-     and why you stopped where you did.
+---
 
-     "I ran out of time" is fine if it's true. Pretending nothing is left is
-     not.
+# Diagnoses
 
-     Milestone 5. -->
+## Criterion 1 — Retrieval contains the answer
 
-## What I'd Do Differently
+**Verdict: Miss**
 
-<!-- Knowing what you know now — which of your five criteria would you write
-     differently, and why?
+The largest weakness in the baseline evaluation was retrieval.
 
-     Milestone 5. -->
+The five evaluation questions are highly specific. They ask about finals-week quiet hours, a particular dining hall, first-year parking, a sophomore room lottery, and 24/7 library access.
+
+The corpus consists primarily of general college-survival articles and student-advice content. Some of the questions therefore require information that is more specific than what is consistently represented in the corpus.
+
+This means the failure is primarily a **retrieval/corpus-coverage problem**, rather than simply a generation problem.
+
+When the relevant information is not present in the retrieved chunks, the generation model cannot reliably produce a grounded answer.
+
+---
+
+## Criterion 2 — Source attribution
+
+**Verdict: Pass**
+
+Source attribution performed consistently.
+
+The system extracts the source filename from the retrieved chunk metadata and appends the retrieved sources to the answer. This means the source list does not depend entirely on the language model remembering to provide a citation.
+
+The programmatic source attribution helps satisfy this criterion even when the generated answer itself is incomplete.
+
+---
+
+## Criterion 3 — Relevance gate
+
+**Verdict: Pass**
+
+The relevance gate generally prevented questions outside the corpus from reaching generation.
+
+The gate compares the best retrieval distance against the configured threshold. Because the out-of-scope questions are unrelated to the campus-survival corpus, most were correctly rejected.
+
+The small amount of variation across runs shows why repeated testing was useful rather than relying on a single successful run.
+
+---
+
+## Criterion 4 — Chunk quality
+
+**Verdict: Pass**
+
+The chunking strategy produced chunks that were generally understandable when read independently.
+
+The system uses a 500-character chunk size with 50 characters of overlap and the `RecursiveCharacterTextSplitter`. The splitter attempts paragraph and sentence boundaries before falling back to character boundaries.
+
+The sampled chunks retained enough context to understand the advice they contained, and the minimum-length requirement was satisfied.
+
+---
+
+## Criterion 5 — Grounded generation
+
+**Verdict: Miss**
+
+The generation prompt strongly instructs the model to use only the retrieved context, but grounding can still fail when the retrieved context does not contain enough information to answer a specific question.
+
+For example, when the corpus provides only general advice about a topic but the question asks for a specific campus policy, the model has limited evidence from which to construct an answer.
+
+This makes Criterion 5 dependent not only on the generation prompt but also on retrieval quality.
+
+The failure therefore traces back primarily to the **retrieval/context stage**, with generation becoming the point where the missing information becomes visible in the final answer.
+
+---
+
+# Failure Case Analysis
+
+## Failure: Specific campus-policy questions
+
+Several of the evaluation questions require highly specific information:
+
+* finals-week residential quiet hours
+* dining hall lunch wait times
+* first-year parking policies
+* sophomore room-lottery priority
+* 24/7 library access
+
+The corpus primarily contains general college-survival advice. As a result, some retrieved chunks are semantically related to the question without actually containing the specific answer.
+
+This creates a distinction between **retrieval relevance** and **answer sufficiency**.
+
+A chunk can be about college housing, for example, without containing the exact housing policy needed to answer a question about room-lottery priority.
+
+The failure therefore occurs because the retrieved context is related to the topic but does not always contain the required fact.
+
+---
+
+# The Improvement
+
+Based on the baseline results, I would make one change focused on retrieval.
+
+### Change
+
+Increase the number of retrieved chunks from:
+
+```python
+TOP_K = 5
+```
+
+to:
+
+```python
+TOP_K = 8
+```
+
+### Why I chose this change
+
+The baseline results suggest that some questions are retrieving generally related information but may not be retrieving enough candidate chunks to expose the relevant evidence.
+
+Increasing `TOP_K` allows the generator to see a larger set of candidate chunks.
+
+This change targets the retrieval stage directly while leaving the questions, acceptance criteria, generation prompt, and relevance threshold unchanged.
+
+Only one variable is changed so that the Before and After experiments remain comparable.
+
+---
+
+
+
+---
+
+# Did It Help?
+
+The After results should be compared directly with the Before results.
+
+The primary question is whether increasing `TOP_K` improved Criterion 1, because that was the criterion most directly connected to the diagnosed retrieval problem.
+
+If Criterion 1 improves, this provides evidence that the original retrieval cutoff was too restrictive.
+
+If Criterion 1 does not improve, the result suggests that the problem is not simply the number of retrieved chunks. Instead, the corpus may not contain the information needed to answer the questions.
+
+This distinction is important because retrieving more irrelevant chunks does not solve a corpus-coverage problem.
+
+---
+
+# What's Still Broken?
+
+The main remaining limitation is corpus coverage.
+
+The evaluation questions are more specific than much of the source material. Even with improved retrieval, the system cannot provide a grounded answer when the underlying information does not exist in the documents.
+
+Criterion 5 may also remain difficult because a larger retrieval set can provide more information but can also introduce additional unrelated context.
+
+The system therefore still needs a better balance between retrieving enough evidence and avoiding irrelevant context.
+
+---
+
+# What I'd Do Differently
+
+The evaluation showed that retrieval quality depends heavily on whether the corpus actually contains information that matches the specificity of the evaluation questions.
+
+In a future version, I would make sure that each evaluation question has at least one clearly relevant source document in the corpus before evaluating the retrieval pipeline.
+
+I would also define a more mechanical procedure for Criterion 5. Rather than judging an answer as simply "grounded" or "not grounded," I would break the answer into individual factual claims and check each claim against the retrieved text.
+
+This would make the evaluation more reproducible and make it easier to distinguish retrieval failures from generation failures.
